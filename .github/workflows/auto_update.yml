@@ -1,32 +1,27 @@
 name: 실시간 이슈 자동 업데이트
 
 on:
+workflow_dispatch: # 이 문구가 수동 버튼을 만듭니다
 schedule:
-- cron: '0 * * * *' # 매시간 0분마다 자동으로 실행
-workflow_dispatch: # 수동으로도 실행 가능하게 설정
+- cron: '0 * * * *'
 
 jobs:
 build:
 runs-on: ubuntu-latest
 steps:
-- name: 코드 체크아웃
-uses: actions/checkout@v3
-
+- uses: actions/checkout@v3
 - name: 파이썬 설치
 uses: actions/setup-python@v4
 with:
 python-version: '3.9'
-
-- name: 필요한 도구 설치
-run: pip install -r requirements.txt
-
-- name: 데이터 업데이트 실행
+- name: 라이브러리 설치
+run: pip install requests beautifulsoup4
+- name: 데이터 업데이트
 run: python update_news.py
-
-- name: 변경사항 저장 및 반영
+- name: 변경사항 반영
 run: |
-git config --global user.name 'AutoBot'
-git config --global user.email 'bot@noreply.com'
+git config --global user.name 'github-actions'
+git config --global user.email 'github-actions@github.com'
 git add index.html
-git commit -m "실시간 이슈 자동 업데이트 완료"
+git commit -m "update" || exit 0
 git push
