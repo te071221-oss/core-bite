@@ -1,32 +1,32 @@
-import requests
-from bs4 import BeautifulSoup
-import datetime
+name: 실시간 이슈 자동 업데이트
 
-def get_issue():
-# 일단 네이트판 실시간 랭킹을 긁어오는 예시입니다.
-header = {'User-Agent': 'Mozilla/5.0'}
-url = "https://pann.nate.com/talk/ranking"
-try:
-res = requests.get(url, headers=header)
-soup = BeautifulSoup(res.text, 'html.parser')
-title = soup.select_one('.tit').text.strip()
-return title
-except:
-return "실시간 이슈 분석 중..."
+on:
+workflow_dispatch:
+schedule:
+- cron: '0 * * * *'
 
-def update_html(new_title):
-with open("index.html", "r", encoding="utf-8") as f:
-content = f.read()
+permissions:
+contents: write
 
-import re
-# 제목 부분 교체
-content = re.sub(r'id="title".*?>.*?</h2', f'id="title" class="text-xl font-bold mb-4 leading-snug tracking-tight text-gray-800">{new_title}</h2', content, flags=re.DOTALL)
+jobs:
+build:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v3
+- name: 파이썬 설정
+uses: actions/setup-python@v4
+with:
+python-version: '3.9'
+- name: 라이브러리 설치
+run: pip install requests beautifulsoup4
+- name: 데이터 업데이트
+run: python update_news.py
+- name: 변경사항 반영
+run: |
+git config --global user.name 'github-actions'
+git config --global user.email 'github-actions@github.com'
+git add index.html
+git commit -m "update" || exit 0
+git push
 
-with open("index.html", "w", encoding="utf-8") as f:
-f.write(content)
-
-if __name__ == "__main__":
-issue_title = get_issue()
-update_html(issue_title)
-print("업데이트 완료:", issue_title)
 
