@@ -1,33 +1,23 @@
-name: 실시간 이슈 자동 업데이트
-
+name: bot
 on:
 workflow_dispatch:
-schedule:
-- cron: '0 * * * *'
-
 permissions:
-  contents: write
+contents: write
 jobs:
-build:
+run:
 runs-on: ubuntu-latest
 steps:
 - uses: actions/checkout@v3
-
-- name: 파이썬 설정
+- name: set
 uses: actions/setup-python@v4
 with:
 python-version: '3.9'
-
-- name: 라이브러리 설치
-run: pip install requests beautifulsoup4
-
-- name: 데이터 업데이트
-run: python update_news.py
-
-- name: 변경사항 반영
+- name: work
 run: |
-git config --global user.name 'github-actions'
-git config --global user.email 'github-actions@github.com'
-git add index.html
-git commit -m "update" || exit 0
+pip install requests beautifulsoup4
+python update_news.py
+git config --global user.name
+git config --global user.email 'bot@bot.com'
+git add .
+git commit -m "up" || exit 0
 git push
